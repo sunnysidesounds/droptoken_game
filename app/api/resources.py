@@ -211,7 +211,19 @@ class GameState(Resource):
 
 class GameMoves(Resource):
     def get(self, game_id):
-        return 'Game Moves {0}'.format(game_id)
+        if not game_id.isdigit():
+            abort(400, constants.NO_REQUIRED_GAME_STATE_VALUES_ERROR)
+
+        query = text("""select p.name as `player`, m.type, m.board_column as `column` from moves m
+        JOIN players p ON p.id = m.player_id WHERE m.game_id = :id""")
+
+        data = db.engine.execute(query, id=game_id).fetchall()
+        if not data:
+            abort(404, constants.MOVE_NOT_FOUND_ERROR)
+
+        moves_data = [dict(move) for move in db.engine.execute(query, id=game_id).fetchall()]
+
+        return moves_data
 
 
 class GameMove(Resource):
