@@ -1,16 +1,16 @@
 
 /* GAMES TABLE */
 CREATE TABLE `games` (
-        `id` int unsigned NOT NULL AUTO_INCREMENT,
-        `name` varchar(255) DEFAULT NULL,
-        `columns` int unsigned NOT NULL DEFAULT '0',
-        `rows` int unsigned NOT NULL DEFAULT '0',
-        `board` json DEFAULT NULL,
-        `state` enum('DONE','INPROGRESS') NOT NULL,
-        `winner_id` int unsigned NOT NULL DEFAULT '0',
-        `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+     `id` int unsigned NOT NULL AUTO_INCREMENT,
+     `name` varchar(255) DEFAULT NULL,
+     `columns` int unsigned NOT NULL DEFAULT '0',
+     `rows` int unsigned NOT NULL DEFAULT '0',
+     `board` json DEFAULT NULL,
+     `state` enum('DONE','INPROGRESS') NOT NULL,
+     `winner` varchar(255) DEFAULT NULL,
+     `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+     PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 
 
 /* PLAYERS TABLE */

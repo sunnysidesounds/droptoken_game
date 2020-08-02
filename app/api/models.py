@@ -29,7 +29,7 @@ class GamesModel(db.Model):
     rows = db.Column(db.Integer)
     board = db.Column(JSON)
     state = db.Column(db.Enum(StateType))
-    winner_id = db.Column(db.Integer)
+    winner = db.Column(db.String(length=255))
     last_updated = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def __repr__(self):
@@ -43,7 +43,7 @@ class GamesModel(db.Model):
         game = self.query.filter_by(id=game_id).first()
         game.state = model['state']
         game.board = model['board']
-        game.board = model['winner_id']
+        game.board = model['winner']
         db.session.commit()
 
 

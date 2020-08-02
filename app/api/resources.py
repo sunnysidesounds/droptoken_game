@@ -1,6 +1,7 @@
 import json
 from flask import request, abort
 from flask_restful import Resource, reqparse
+from sqlalchemy.sql import text
 from app.support.utils import *
 from app.support import constants
 from app.support.db import db
@@ -13,10 +14,16 @@ parser.add_argument('until', type=int)
 
 class Games(Resource):
     def get(self):
-        return 'TODO'
+        games = GamesModel.query.filter_by(state=StateType.INPROGRESS).all()
+        games_response = []
+        for game in games:
+            games_response.append(game.name)
+        return {"games": games_response}
 
     def post(self):
         data = request.get_json(force=True)
+
+        # TODO: Look at more validation, model level
 
         if 'columns' in data and 'rows' in data and 'players' in data:
             game = self.create_game(data)
@@ -24,13 +31,13 @@ class Games(Resource):
             game_id = game[1]
             if game_primary_key:
 
-                for player in data['players']:
-                    if self.player_exists(player):
+                for player_name in data['players']:
+                    if self.player_exists(player_name):
                         # Add to the games to players table
-                        self.create_game_to_player(game_primary_key, player)
+                        self.create_game_to_player(game_primary_key, self.get_player_id(player_name))
                     else:
                         # A new user to players table
-                        player_primary_key = self.create_player(player)
+                        player_primary_key = self.create_player(player_name)
                         # Then Add to the games to players table
                         self.create_game_to_player(game_primary_key, player_primary_key)
                 return {"gameId": game_id}
@@ -46,7 +53,6 @@ class Games(Resource):
         model.game_id = game_id
         model.player_id = player_id
         model.save()
-
         db.session.flush()
         return model.id
 
@@ -58,9 +64,8 @@ class Games(Resource):
         model.rows = data['rows']
         model.board = json.dumps(generate_board(data['columns'], data['rows']))
         model.state = StateType.INPROGRESS
-        model.winner_id = 0
+        model.winner = ''
         model.save()
-
         db.session.flush()
         return (model.id, game_id)
 
@@ -70,8 +75,6 @@ class Games(Resource):
         model.save()
         db.session.flush()
         return model.id
-
-
 
     def generate_unique_game_id(self):
         # try 5 times to generate a unique game id
@@ -83,78 +86,58 @@ class Games(Resource):
                 return game_id
         return None
 
-    def player_exists(self, player_id):
-        player_id = PlayersModel.query.filter_by(id=player_id).first()
+    def player_exists(self, player_name):
+        player_id = PlayersModel.query.filter_by(name=player_name).first()
         if player_id:
             return True
         return False
 
-
-
-
-
-
-
-
-
-
-
-
-
-        #games_model.save()
-
-
-        print(data)
-        return 'TODO'
-
-
-
-"""
-    def post(self):
-        args = parser.parse_args()
-        user_id = args['id']
-        data = request.get_json(force=True)
-        if user_id:
-            query = PROJECT_QUERY + "WHERE id = {userId}".format(userId=user_id)
-            user_json = QueryToResponseJSON(query).get_one()['response']
-            user_model = UserModel()
-            user_model.update(user_id, {"username": data['username'] if 'username' in data else user_json['username'],
-                                        "first_name": data['first_name'] if 'first_name' in data else user_json['first_name'],
-                                        "last_name": data['last_name'] if 'last_name' in data else user_json['last_name'],
-                                        "email": data['email'] if 'email' in data else user_json['email']})
-
-            return response_json(True, data, None)
-        else:
-            if "username" not in data:
-                return response_json(True, data, constants.NO_USERNAME)
-            if "first_name" not in data:
-                return response_json(True, data, constants.NO_FIRST_NAME)
-            if "last_name" not in data:
-                return response_json(True, data, constants.NO_LAST_NAME)
-            if "email" not in data:
-                return response_json(True, data, constants.NO_EMAIL)
-
-            if not self.is_username_exist(data['username']):
-                user_model = UserModel(
-                    username=data['username'],
-                    first_name=data['first_name'],
-                    last_name=data['last_name'],
-                    email=data['email'],
-                )
-                user_model.save()
-                return response_json(True, data, None)
-            else:
-                return response_json(True, data, constants.NO_USERNAME)
-
-"""
-
-
-
+    def get_player_id(self, player_name):
+        player = PlayersModel.query.filter_by(name=player_name).first()
+        return player.id
 
 
 class GameState(Resource):
     def get(self, game_id):
-        return 'Game State {0}'.format(game_id)
+
+        # Able to pass in game name (uuid) or primary key
+        if game_id.isdigit():
+            where_clause = "where g.id = :id"
+        elif validate_uuid(game_id):
+            where_clause = "where g.name = :id"
+        else:
+            where_clause = ''
+            abort(400, constants.NO_REQUIRED_GAME_STATE_VALUES_ERROR)
+
+
+        query_text = """select p.name as name, g.state as state, g.winner as winner from games g
+        JOIN games_to_players gs ON g.id = gs.game_id
+        JOIN players p ON p.id = gs.player_id {whereClause}""".format(whereClause=where_clause)
+
+        query = text(query_text)
+        player_states = [dict(player) for player in db.engine.execute(query, id=game_id).fetchall()]
+
+        if len(player_states) == 0:
+            abort(404, constants.NO_GAME_FOUND)
+
+        player_names = []
+        winners = None
+
+        for state in player_states:
+            player_names.append(state['name'])
+            if not state['winner']:
+                winners = state['winner']
+
+        game_state = player_states[0]['state']
+        results = {"players": player_names, 'state': game_state}
+
+        if game_state == StateType.DONE:
+            if winners == 'draw':
+                results['winner'] = 'null'
+            else:
+                results['winner'] = winners
+
+        return results
 
 
 class GameMoves(Resource):

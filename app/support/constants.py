@@ -6,3 +6,5 @@ NO_DATA = "No data for this request"
 # Error Messages
 NO_REQUIRED_GAME_VALUES_ERROR = 'Malformed request: Requires `columns`, `rows` and `players` values in request'
 GAME_CREATION_ERROR = 'Game could not be created!'
+NO_REQUIRED_GAME_STATE_VALUES_ERROR = 'Malformed request: Requires integer based game_id or string based uuid'
+NO_GAME_FOUND = 'Game could not be found'
