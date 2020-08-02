@@ -1,42 +1,37 @@
+# List of Service Endpoints
 
-#
+# ReturnAllInProgressGames endpoint resource
 curl -X GET 'http://localhost:5000/drop_token'
 
-#
+# CreateNewGame endpoint resource
 curl --header "Content-Type: application/json" \
     --request POST \
-    --data '{ "players": ["player1", "player2"], "columns": 4, "rows": 4}' \
-    http://localhost:5000/drop_token/
+    --data '{ "players": ["player20", "player21"], "columns": 4, "rows": 4}' \
+    http://localhost:5000/drop_token
 
-curl --header "Content-Type: application/json" \
-    --request POST \
-    --data '{ "players": ["player3", "player4"], "columns": 4, "rows": 4}' \
-    http://localhost:5000/drop_token/
-
-curl --header "Content-Type: application/json" \
-    --request POST \
-    --data '{ "players": ["player5", "player6"], "columns": 4, "rows": 4}' \
-    http://localhost:5000/drop_token/
-
-`curl --header "Content-Type: application/json" \
-    --request POST \
-    --data '{ "players": ["player1", "player7"], "columns": 4, "rows": 4}' \
-    http://localhost:5000/drop_token/`
-
-#
+# GetStateOfGame endpoint resource
 curl -X GET 'http://localhost:5000/drop_token/13'
 
+# No longer works. TODO make work?
 curl -X GET 'http://localhost:5000/drop_token/c52b16e0-d3b7-11ea-879a-8c85904e8d06'
 
+# GetListOfMovesPlayed endpoint resource
+curl -X GET 'http://localhost:5000/drop_token/1/moves'
 
+
+# PostAGameMove endpoint resource
 curl --header "Content-Type: application/json" \
     --request POST \
     --data '{"column" : 2}' \
-    http://localhost:5000/drop_token/18/1
+    http://localhost:5000/drop_token/1/1
 
-curl -X GET 'http://localhost:5000/drop_token/19/moves/3'
 
-curl -X DELETE 'http://localhost:5000/drop_token/19/4'
+# GetMovePlayed endpoint resource
+curl -X GET 'http://localhost:5000/drop_token/2/moves/bad_test'
+curl -X GET 'http://localhost:5000/drop_token/1/moves/2'
+
+# PlayerQuitsGame endpoint resource
+curl -X DELETE 'http://localhost:5000/drop_token/1/1'
 
 
 

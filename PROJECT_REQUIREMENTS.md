@@ -13,9 +13,9 @@
 ### Requirements
 
 - [X] Each game is between k = 2 individuals, basic board size is 4x4 (number of columns x number of rows)
-- [ ] A player can quit a game at every moment while the game is still in progress. The game will continue as long as there are 2 or more active players and the game is not done. In case only a single player is left, that player is considered the winner.
+- [X] A player can quit a game at every moment while the game is still in progress. The game will continue as long as there are 2 or more active players and the game is not done. In case only a single player is left, that player is considered the winner.
 - [ ] The backend should validate that a move move is valid (it's the player's turn, column is not already full)
-- [ ] The backend should identify a winning state.
+- [X] The backend should identify a winning state.
 - [X] Multiple games may be running at the same time.
 
 ### API Requirements
@@ -27,6 +27,6 @@
     - [ ] Optional Query parameters: GET /drop_token/{gameId}/moves?start=0&until=1.
 - [X] POST /drop_token/{gameId}/{playerId} - Post a move.
 - [X] GET /drop_token/{gameId}/moves/{move_number} - Return the move.
-- [ ] DELETE /drop_token/{gameId}/{playerId} - Player quits from game.
+- [X] DELETE /drop_token/{gameId}/{playerId} - Player quits from game.
 
 
