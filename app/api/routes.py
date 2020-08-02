@@ -1,7 +1,7 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 from flask_restful import Api
 
-from .resources import ReturnAllInProgressGames, GetStateOfGame, PostAGameMove, GetListOfMovesPlayed, GetMovePlayed, \
+from .resources import DisplayGameBoard, ReturnAllInProgressGames, GetStateOfGame, PostAGameMove, GetListOfMovesPlayed, GetMovePlayed, \
     CreateNewGame, PlayerQuitsGame
 
 api_bp = Blueprint('api', __name__)
@@ -15,3 +15,9 @@ api.add_resource(GetListOfMovesPlayed, '/<game_id>/moves', methods=['GET'], endp
 api.add_resource(PostAGameMove, '/<game_id>/<player_id>', methods=['POST'], endpoint='post_a_game_move')
 api.add_resource(GetMovePlayed, '/<game_id>/moves/<int:move_number>', methods=['GET'], endpoint='get_move_played')
 api.add_resource(PlayerQuitsGame, '/<game_id>/<player_id>', methods=['DELETE'], endpoint='player_quits_game')
+
+#api.add_resource(DisplayGameBoard, '/<game_id>/board', methods=['GET'], endpoint='display_game_board')
+
+@api.route("/<game_id>/board")
+def index():
+    return render_template('index.html')

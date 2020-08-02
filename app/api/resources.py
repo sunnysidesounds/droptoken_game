@@ -1,5 +1,5 @@
 import json
-from flask import request, abort
+from flask import request, abort, render_template
 from flask_restful import Resource, reqparse
 from sqlalchemy.sql import text
 from app.support.utils import *
@@ -10,6 +10,17 @@ from .models import GamesModel, PlayersModel, GamesToPlayersModel, StateType, Mo
 parser = reqparse.RequestParser()
 parser.add_argument('start', type=int)
 parser.add_argument('until', type=int)
+
+
+class DisplayGameBoard(Resource):
+    def get(self, game_id):
+
+        if not game_id.isdigit():
+            abort(400, constants.NO_REQUIRED_GAME_STATE_VALUES_ERROR)
+
+        game_data = GameCreator.get_game(game_id)
+        return render_template('index.html', game=game_data)
+
 
 
 class CreateNewGame(Resource):
