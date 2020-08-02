@@ -32,7 +32,7 @@ class Games(Resource):
             if game_primary_key:
 
                 for player_name in data['players']:
-                    if self.player_exists(player_name):
+                    if Games.player_exists(player_name):
                         # Add to the games to players table
                         self.create_game_to_player(game_primary_key, self.get_player_id(player_name))
                     else:
@@ -65,6 +65,7 @@ class Games(Resource):
         model.board = json.dumps(generate_board(data['columns'], data['rows']))
         model.state = StateType.INPROGRESS
         model.winner = ''
+        model.active_turn = data['players'][0] #set first player in list to active user
         model.save()
         db.session.flush()
         return (model.id, game_id)
@@ -86,10 +87,28 @@ class Games(Resource):
                 return game_id
         return None
 
-    def player_exists(self, player_name):
-        player_id = PlayersModel.query.filter_by(name=player_name).first()
-        if player_id:
+    @staticmethod
+    def player_exists(player_name):
+        # Check for name and id
+        player = PlayersModel.query.filter_by(name=player_name).first()
+        if player:
             return True
+        else:
+            player = PlayersModel.query.filter_by(id=player_name).first()
+            if player:
+                return True
+        return False
+
+    @staticmethod
+    def game_exists(game_id):
+        # Check for name and id
+        game = GamesModel.query.filter_by(name=game_id).first()
+        if game:
+            return True
+        else:
+            game = GamesModel.query.filter_by(id=game_id).first()
+            if game:
+                return True
         return False
 
     def get_player_id(self, player_name):
@@ -144,16 +163,52 @@ class GameMoves(Resource):
     def get(self, game_id):
         return 'Game Moves {0}'.format(game_id)
 
-    def post(self):
-        return 'TODO'
-
 
 class GameMove(Resource):
     def get(self, game_id):
         return 'Game Moves {0}'.format(game_id)
 
+    def post(self, game_id, player_id):
+        data = request.get_json(force=True)
+
+        if game_id.isdigit() or validate_uuid(game_id):  # must be primary key or uuid
+            if not Games.game_exists(game_id):
+                abort(404, constants.NO_GAME_FOUND)
+        else:
+            pass
+
+        if not Games.player_exists(player_id):  # can be primary key or just string player name
+            abort(404, constants.NO_PLAYER_FOUND)
+
+        if 'column' in data and data['column'].isdigit():
+
+            # Get game board
+
+            # Validate move on board
+
+            # Update game board with move, update active_turn
+
+            # Insert move data in to move table
+
+
+
+            pass
+        else:
+            abort(400, constants.NO_REQUIRED_GAME_MOVE_ERROR)
+
+
+
+
     def delete(self, game_id, player_id):
         return 'Game QUITS {0} {1}'.format(game_id, player_id)
+
+
+
+
+
+
+
+
 
 
 # TODO : DO WE NEED MAY NEED TO REMOVE THIS CLASS

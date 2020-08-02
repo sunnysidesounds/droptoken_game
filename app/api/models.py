@@ -29,6 +29,7 @@ class GamesModel(db.Model):
     rows = db.Column(db.Integer)
     board = db.Column(JSON)
     state = db.Column(db.Enum(StateType))
+    active_turn = db.Column(db.String(length=255))
     winner = db.Column(db.String(length=255))
     last_updated = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
@@ -43,7 +44,7 @@ class GamesModel(db.Model):
         game = self.query.filter_by(id=game_id).first()
         game.state = model['state']
         game.board = model['board']
-        game.board = model['winner']
+        game.winner = model['winner']
         db.session.commit()
 
 

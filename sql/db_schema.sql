@@ -7,6 +7,7 @@ CREATE TABLE `games` (
      `rows` int unsigned NOT NULL DEFAULT '0',
      `board` json DEFAULT NULL,
      `state` enum('DONE','INPROGRESS') NOT NULL,
+     `active_turn` varchar(255) DEFAULT NULL,
      `winner` varchar(255) DEFAULT NULL,
      `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
      PRIMARY KEY (`id`)
