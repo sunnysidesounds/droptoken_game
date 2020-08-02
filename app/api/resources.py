@@ -240,11 +240,16 @@ class GameMove(Resource):
             game = Games.get_game(game_id)
             game_players = Games.get_players(game_id)
 
+            # Check if Game is already completed
+            if game.state is StateType.DONE:
+                abort(409, constants.GAME_DONE_ERROR)
+
             # Check if it's players turn.
             player_name = Games.get_player_name(player_id)
             if player_name != game.active_turn:
                 abort(409, constants.PLAYER_NOT_TURN_ERROR)
 
+            # Set next player to play
             next_player = None
             winner = ''
             for player in game_players:
@@ -265,10 +270,11 @@ class GameMove(Resource):
                         current_row = current_row - 1
                         break
 
-                # TODO : Check for illegal moves
+                # Check for illegal moves
+                if board_game[current_row][current_column] != 0:
+                    abort(409, constants.CAN_NOT_MOVE_ERROR)
 
                 board_game[current_row][current_column] = player_id
-
                 if Games.has_player_won(board_game):
                     game.state = StateType.DONE
                     next_player = ''
@@ -284,8 +290,8 @@ class GameMove(Resource):
                 game_moves.game_id = game_id
                 game_moves.player_id = player_id
                 game_moves.type = MoveType.MOVE
-                game_moves.board_column = current_column
-                game_moves.board_row = current_row
+                game_moves.board_column = current_column + 1
+                game_moves.board_row = current_row + 1
                 game_moves.save()
 
                 return {"move": "{gameId}/moves/{move_number}".format(gameId=game_id, move_number=data['column'])}
