@@ -36,5 +36,7 @@ curl --header "Content-Type: application/json" \
 
 curl -X GET 'http://localhost:5000/drop_token/19/moves/3'
 
+curl -X DELETE 'http://localhost:5000/drop_token/19/4'
+
 
 

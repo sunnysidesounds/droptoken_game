@@ -247,6 +247,7 @@ class GameMove(Resource):
         data = request.get_json(force=True)
 
         # validate game_id
+        # TODO: Remove uuid
         if game_id.isdigit() or validate_uuid(game_id):  # must be primary key or uuid
             if not Games.game_exists(game_id):
                 abort(404, constants.NO_GAME_FOUND)
@@ -298,10 +299,13 @@ class GameMove(Resource):
                     abort(409, constants.CAN_NOT_MOVE_ERROR)
 
                 board_game[current_row][current_column] = player_id
+                # Check if player won after move
                 if Games.has_player_won(board_game, player_id):
                     game.state = StateType.DONE
                     next_player = ''
                     winner = player_name
+
+                # TODO: Check for draw
 
                 game.update(game_id, {"state": game.state,
                                       "board": json.dumps(board_game),
@@ -327,7 +331,46 @@ class GameMove(Resource):
 
 
     def delete(self, game_id, player_id):
-        return 'Game QUITS {0} {1}'.format(game_id, player_id)
+
+        # validate game_id
+        if game_id.isdigit():  # must be primary key or uuid
+            if not Games.game_exists(game_id):
+                abort(404, constants.NO_GAME_FOUND)
+        else:
+            abort(400, constants.NO_REQUIRED_GAME_MOVE_ERROR)
+
+        # validate player_id
+        if not Games.player_exists(player_id):
+            abort(404, constants.NO_PLAYER_FOUND)
+
+
+        game = Games.get_game(game_id)
+        game_players = Games.get_players(game_id)
+
+        # TODO : Check if players is apart of this game
+
+        # Check if Game is already completed
+        if game.state is StateType.DONE:
+            abort(410, constants.GAME_DONE_ERROR)
+
+        # Update Game to DONE
+        # Change this part to accommodate more than k = 2 players to a game
+        # Right now since only 2 player, set game to gone, when one player quits.
+        game.update(game_id, {"state": StateType.DONE,
+                              "board": json.dumps(game.board),
+                              "active_turn": "",
+                              "winner": ""})
+
+        # Add new move quit row.
+        game_moves = MovesModel()
+        game_moves.game_id = game_id
+        game_moves.player_id = player_id
+        game_moves.type = MoveType.QUIT
+        game_moves.board_column = -1
+        game_moves.board_row = -1
+        game_moves.save()
+
+        return True
 
 
 

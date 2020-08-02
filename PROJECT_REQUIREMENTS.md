@@ -23,7 +23,7 @@
 - [X] GET /drop_token - Return all in-progress games.
 - [X] POST /drop_token - Create a new game.
 - [X] GET /drop_token/{gameId} - Get the state of the game.
-- [ ] GET /drop_token/{gameId}/moves- Get (sub) list of the moves played.
+- [X] GET /drop_token/{gameId}/moves- Get (sub) list of the moves played.
     - [ ] Optional Query parameters: GET /drop_token/{gameId}/moves?start=0&until=1.
 - [X] POST /drop_token/{gameId}/{playerId} - Post a move.
 - [X] GET /drop_token/{gameId}/moves/{move_number} - Return the move.
