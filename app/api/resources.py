@@ -5,7 +5,7 @@ from sqlalchemy.sql import text
 from app.support.utils import *
 from app.support import constants
 from app.support.db import db
-from .models import GamesModel, PlayersModel, GamesToPlayersModel, StateType
+from .models import GamesModel, PlayersModel, GamesToPlayersModel, StateType, MovesModel, MoveType
 
 parser = reqparse.RequestParser()
 parser.add_argument('start', type=int)
@@ -116,6 +116,11 @@ class Games(Resource):
         return player.id
 
     @staticmethod
+    def get_player_name(player_id):
+        player = PlayersModel.query.filter_by(id=player_id).first()
+        return player.name
+
+    @staticmethod
     def get_game(game_id):
         # Check for name and id
         game = GamesModel.query.filter_by(name=game_id).first()
@@ -134,6 +139,31 @@ class Games(Resource):
         JOIN players p ON p.id = gs.player_id WHERE g.id = :id""")
         return [dict(player) for player in db.engine.execute(query, id=game_id).fetchall()]
 
+    @staticmethod
+    def has_player_won(board):
+        has_won = False
+
+        # Check columns
+        for i in range(0, len(board)):
+            column = get_column(board, i)
+            if all_same_values(column):
+                has_won = True
+                break
+
+        # Check rows
+        for i in range(0, len(board)):
+            row = board[i]
+            if all_same_values(row):
+                has_won = True
+                break
+
+        # Check diagonals
+        for diagnoal in get_diagonals(board):
+            if all_same_values(diagnoal):
+                has_won = True
+                break
+
+        return has_won
 
 
 class GameState(Resource):
@@ -202,49 +232,64 @@ class GameMove(Resource):
         if not Games.player_exists(player_id):  # can be primary key or just string player name
             abort(404, constants.NO_PLAYER_FOUND)
 
-        # TODO VaLidate if this user can even play, check active_turn
-
-        # TODO Get players list for game
+        #TODO Check state of game
 
         if 'column' in data:
 
             # Get game board
             game = Games.get_game(game_id)
+            game_players = Games.get_players(game_id)
+
+            # Check if it's players turn.
+            player_name = Games.get_player_name(player_id)
+            if player_name != game.active_turn:
+                abort(409, constants.PLAYER_NOT_TURN_ERROR)
+
+            next_player = None
+            winner = ''
+            for player in game_players:
+                if player['player_name'] != game.active_turn:
+                    next_player = player['player_name']
+
             game_column = game.columns - 1
-            current_column = data['column'] - 1  # switch column passed into to zero index
+            current_column = data['column'] - 1
 
             if current_column <= game_column:
                 board_game = json.loads(game.board)
-                index = 0
+                current_row = 0
 
                 for i in range(0, len(board_game)):
                     move = board_game[i][current_column]
-                    index = i
+                    current_row = i
                     if move != 0:
-                        index = index - 1
+                        current_row = current_row - 1
                         break
 
-                board_game[index][current_column] = player_id
+                # TODO : Check for illegal moves
 
-                # TODO : Get next player
-                game_players = Games.get_players(game_id)
-                next_player = None
-                for player in game_players:
-                    if player['player_id'] != int(player_id):
-                        next_player = player['player_name']
+                board_game[current_row][current_column] = player_id
 
-
-                # TODO: Check if there's a winner or draw. then update
+                if Games.has_player_won(board_game):
+                    game.state = StateType.DONE
+                    next_player = ''
+                    winner = player_name
 
                 game.update(game_id, {"state": game.state,
                                       "board": json.dumps(board_game),
-                                      "active_turn": next_player,  # TODO: Need to second player
-                                      "winner": ""})
-
+                                      "active_turn": next_player,
+                                      "winner": winner})
 
                 # Insert move data in to move table
+                game_moves = MovesModel()
+                game_moves.game_id = game_id
+                game_moves.player_id = player_id
+                game_moves.type = MoveType.MOVE
+                game_moves.board_column = current_column
+                game_moves.board_row = current_row
+                game_moves.save()
 
-                pass
+                return {"move": "{gameId}/moves/{move_number}".format(gameId=game_id, move_number=data['column'])}
+
             else:
                 abort(400, constants.OUT_OF_BOUNDS_COLUMN_ERROR)
 
