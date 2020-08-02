@@ -140,26 +140,26 @@ class Games(Resource):
         return [dict(player) for player in db.engine.execute(query, id=game_id).fetchall()]
 
     @staticmethod
-    def has_player_won(board):
+    def has_player_won(board, player_id):
         has_won = False
 
         # Check columns
         for i in range(0, len(board)):
             column = get_column(board, i)
-            if all_same_values(column):
+            if all_same_values(column, player_id):
                 has_won = True
                 break
 
         # Check rows
         for i in range(0, len(board)):
             row = board[i]
-            if all_same_values(row):
+            if all_same_values(row, player_id):
                 has_won = True
                 break
 
         # Check diagonals
         for diagnoal in get_diagonals(board):
-            if all_same_values(diagnoal):
+            if all_same_values(diagnoal, player_id):
                 has_won = True
                 break
 
@@ -172,7 +172,7 @@ class GameState(Resource):
         # Able to pass in game name (uuid) or primary key
         if game_id.isdigit():
             where_clause = "where g.id = :id"
-        elif validate_uuid(game_id):
+        elif validate_uuid(game_id): # TODO: Remove uuid stuff
             where_clause = "where g.name = :id"
         else:
             where_clause = ''
@@ -215,8 +215,21 @@ class GameMoves(Resource):
 
 
 class GameMove(Resource):
-    def get(self, game_id):
-        return 'Game Moves {0}'.format(game_id)
+    def get(self, game_id, move_number):
+
+        if not game_id.isdigit():
+            abort(400, constants.NO_REQUIRED_GAME_STATE_VALUES_ERROR)
+
+        query = text("""select p.name as `player`, m.type, m.board_column as `column` from moves m
+        JOIN players p ON p.id = m.player_id WHERE m.game_id = :id and m.board_column = :movenumber""")
+
+        data = db.engine.execute(query, id=game_id, movenumber=move_number).fetchone()
+        if not data:
+            abort(404, constants.MOVE_NOT_FOUND_ERROR)
+
+        move_data = dict(data)
+
+        return {"type": move_data['type'], "player": move_data['player'], "column": move_data['column']}
 
     def post(self, game_id, player_id):
         data = request.get_json(force=True)
@@ -231,8 +244,6 @@ class GameMove(Resource):
         # validate player_id
         if not Games.player_exists(player_id):  # can be primary key or just string player name
             abort(404, constants.NO_PLAYER_FOUND)
-
-        #TODO Check state of game
 
         if 'column' in data:
 
@@ -275,7 +286,7 @@ class GameMove(Resource):
                     abort(409, constants.CAN_NOT_MOVE_ERROR)
 
                 board_game[current_row][current_column] = player_id
-                if Games.has_player_won(board_game):
+                if Games.has_player_won(board_game, player_id):
                     game.state = StateType.DONE
                     next_player = ''
                     winner = player_name
@@ -303,41 +314,8 @@ class GameMove(Resource):
             abort(400, constants.NO_REQUIRED_GAME_MOVE_ERROR)
 
 
-
-
     def delete(self, game_id, player_id):
         return 'Game QUITS {0} {1}'.format(game_id, player_id)
 
 
 
-
-
-
-
-
-
-
-# TODO : DO WE NEED MAY NEED TO REMOVE THIS CLASS
-class QueryToResponseJSON:
-
-    def __init__(self, query):
-        self.query = query
-
-    def get_one(self):
-        data = dict(db.engine.execute(self.query).fetchone())
-        if data:
-            return response_json(True, data, None)
-        else:
-            return response_json(True, data, constants.NO_DATA)
-
-    def get_all(self):
-        data = db.engine.execute(self.query).fetchall()
-        data = [dict(r) for r in data]
-        if data:
-            return response_json(True, data, None)
-        else:
-            return response_json(True, data, constants.NO_DATA)
-
-    def exists(self):
-        data = db.engine.execute(self.query).fetchone()
-        return True if data else False

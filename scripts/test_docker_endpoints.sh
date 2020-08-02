@@ -34,5 +34,7 @@ curl --header "Content-Type: application/json" \
     --data '{"column" : 2}' \
     http://localhost:5000/drop_token/18/1
 
+curl -X GET 'http://localhost:5000/drop_token/19/moves/3'
+
 
 

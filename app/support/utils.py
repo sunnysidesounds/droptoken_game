@@ -24,9 +24,8 @@ def get_diagonals(matrix):
     return [top_left_to_bottom_right, top_right_to_bottom_left]
 
 
-
-def all_same_values(items):
-    return all(x == items[0] for x in items)
+def all_same_values(items, match_item):
+    return all(x == match_item for x in items)
 
 
 def generate_board(columns, rows):

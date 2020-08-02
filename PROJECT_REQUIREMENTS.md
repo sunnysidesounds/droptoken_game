@@ -25,8 +25,8 @@
 - [X] GET /drop_token/{gameId} - Get the state of the game.
 - [ ] GET /drop_token/{gameId}/moves- Get (sub) list of the moves played.
     - [ ] Optional Query parameters: GET /drop_token/{gameId}/moves?start=0&until=1.
-- [-] POST /drop_token/{gameId}/{playerId} - Post a move.
-- [ ] GET /drop_token/{gameId}/moves/{move_number} - Return the move.
+- [X] POST /drop_token/{gameId}/{playerId} - Post a move.
+- [X] GET /drop_token/{gameId}/moves/{move_number} - Return the move.
 - [ ] DELETE /drop_token/{gameId}/{playerId} - Player quits from game.
 
 
