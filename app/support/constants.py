@@ -10,3 +10,4 @@ NO_REQUIRED_GAME_STATE_VALUES_ERROR = 'Malformed request: Requires integer based
 NO_GAME_FOUND = 'Game could not be found'
 NO_PLAYER_FOUND = 'Player could not be foung'
 NO_REQUIRED_GAME_MOVE_ERROR = 'Malformed request: Requires integer based column number'
+OUT_OF_BOUNDS_COLUMN_ERROR = 'Malformed request: Illegal move out of bounds'

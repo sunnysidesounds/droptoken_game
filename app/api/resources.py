@@ -115,6 +115,26 @@ class Games(Resource):
         player = PlayersModel.query.filter_by(name=player_name).first()
         return player.id
 
+    @staticmethod
+    def get_game(game_id):
+        # Check for name and id
+        game = GamesModel.query.filter_by(name=game_id).first()
+        if game:
+            return game
+        else:
+            game = GamesModel.query.filter_by(id=game_id).first()
+            if game:
+                return game
+        return None
+
+    @staticmethod
+    def get_players(game_id):
+        query = text("""select p.name as player_name, p.id as player_id from games g
+        JOIN games_to_players gs ON g.id = gs.game_id
+        JOIN players p ON p.id = gs.player_id WHERE g.id = :id""")
+        return [dict(player) for player in db.engine.execute(query, id=game_id).fetchall()]
+
+
 
 class GameState(Resource):
     def get(self, game_id):
@@ -171,28 +191,63 @@ class GameMove(Resource):
     def post(self, game_id, player_id):
         data = request.get_json(force=True)
 
+        # validate game_id
         if game_id.isdigit() or validate_uuid(game_id):  # must be primary key or uuid
             if not Games.game_exists(game_id):
                 abort(404, constants.NO_GAME_FOUND)
         else:
-            pass
+            abort(400, constants.NO_REQUIRED_GAME_MOVE_ERROR)
 
+        # validate player_id
         if not Games.player_exists(player_id):  # can be primary key or just string player name
             abort(404, constants.NO_PLAYER_FOUND)
 
-        if 'column' in data and data['column'].isdigit():
+        # TODO VaLidate if this user can even play, check active_turn
+
+        # TODO Get players list for game
+
+        if 'column' in data:
 
             # Get game board
+            game = Games.get_game(game_id)
+            game_column = game.columns - 1
+            current_column = data['column'] - 1  # switch column passed into to zero index
 
-            # Validate move on board
+            if current_column <= game_column:
+                board_game = json.loads(game.board)
+                index = 0
 
-            # Update game board with move, update active_turn
+                for i in range(0, len(board_game)):
+                    move = board_game[i][current_column]
+                    index = i
+                    if move != 0:
+                        index = index - 1
+                        break
 
-            # Insert move data in to move table
+                board_game[index][current_column] = player_id
+
+                # TODO : Get next player
+                game_players = Games.get_players(game_id)
+                next_player = None
+                for player in game_players:
+                    if player['player_id'] != int(player_id):
+                        next_player = player['player_name']
 
 
+                # TODO: Check if there's a winner or draw. then update
 
-            pass
+                game.update(game_id, {"state": game.state,
+                                      "board": json.dumps(board_game),
+                                      "active_turn": next_player,  # TODO: Need to second player
+                                      "winner": ""})
+
+
+                # Insert move data in to move table
+
+                pass
+            else:
+                abort(400, constants.OUT_OF_BOUNDS_COLUMN_ERROR)
+
         else:
             abort(400, constants.NO_REQUIRED_GAME_MOVE_ERROR)
 

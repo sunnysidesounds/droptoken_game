@@ -44,6 +44,7 @@ class GamesModel(db.Model):
         game = self.query.filter_by(id=game_id).first()
         game.state = model['state']
         game.board = model['board']
+        game.active_turn = model['active_turn']
         game.winner = model['winner']
         db.session.commit()
 
