@@ -12,17 +12,6 @@ parser.add_argument('start', type=int)
 parser.add_argument('until', type=int)
 
 
-class DisplayGameBoard(Resource):
-    def get(self, game_id):
-
-        if not game_id.isdigit():
-            abort(400, constants.NO_REQUIRED_GAME_STATE_VALUES_ERROR)
-
-        game_data = GameCreator.get_game(game_id)
-        return render_template('index.html', game=game_data)
-
-
-
 class CreateNewGame(Resource):
 
     def post(self):
