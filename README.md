@@ -44,7 +44,7 @@ CREATE TABLE `players` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
-*** Games To Players Table***
+***Games To Players Table***
 ```
 CREATE TABLE `games_to_players` (
        `id` int unsigned NOT NULL AUTO_INCREMENT,
@@ -59,7 +59,7 @@ CREATE TABLE `games_to_players` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
-*** Moves Tables***
+***Moves Tables***
 ```
 CREATE TABLE `moves` (
        `id` int unsigned NOT NULL AUTO_INCREMENT,
