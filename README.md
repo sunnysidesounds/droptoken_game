@@ -1,4 +1,11 @@
 # DROP TOKEN GAME SERVICE
+***98point6 Drop-Token: At-home interview question for BE engineers***
+
+### Task:
+We would like you to implement a backend (REST web-service) that allows playing the game of 9dt,
+or 98point6 drop token. This should allow the players to create games, post moves, query moves
+and get state of games.
+
 
 ### Rules:
 - takes place on a 4x4 grid
@@ -14,6 +21,48 @@
 - Flask Python Web Service: https://flask.palletsprojects.com/en/1.1.x/
 - MYSQL 8.0.19
 - Python 3.8
+
+## Setup
+To setup this service, please follow these steps.
+
+##### Setup with Docker
+
+***Prerequisites***
+- Docker 2.2.0.5
+
+1. Download and install Docker Desktop: https://www.docker.com/products/docker-desktop
+2. Pull down from git or unzip the yaits/ service source code.
+3. Get to the root directory of the service `cd /path-to-project/droptoken_game/`
+4. Build the service: `docker-compose build --no-cache`
+5. Launch the service and db containers: `docker-compose up`
+6. Once up and running visit any of the endpoint urls in the ***ENDPOINTS*** section.
+
+
+##### Setup Locally
+
+***Prerequisites***
+- MYSQL 8.0.19
+- Python 3.8
+- pip / easy_install
+
+1. Install virtualenv using `pip install virtualenv`
+2. Pull down from git or unzip the droptoken_game/ service source code.
+3. Get to the root directory of the service `cd /path-to-project/droptoken_game/`
+4. Create a new virtual environment `virtualenv venv`
+5. Active the new virtual environment `source venv/bin/activate`
+6. Install requirements into virtual environment `venv/bin/pip install -r requirements.txt`
+    - This will install Flask framework, mysql connector...etc.
+7. Login to `mysql -u USER -pPASS` and create a new database `CREATE DATABASE testdb;`
+8. Import the test data `mysql -u USER -pPASS testdb < ./sql/droptoken_game_sample_db.sql`
+9. Start the application by `venv/bin/python app.py`
+10. Once up and running visit any of the endpoint urls in the ***ENDPOINTS*** section.
+
+## Available Endpoints:
+These are the current available endpoints for this service.
+
+***Return All In-Progress Endpoints***
+`curl -X GET 'http://localhost:5000/drop_token'`
+
 
 
 ### Database Schemas
