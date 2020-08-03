@@ -91,8 +91,7 @@ export MYSQL_DATABASE='testdb'
 
 
 ## Trade-offs/Compromises, Scale, or Performance Issue Considerations
-- For high-performance web service using Flask framework might not be the best web framework to service millions of user, like
-JIRA. Languages like Java and Frameworks like Spring, Play or any J2EE application/service framework would probably pretty be suited
+- For high-performance web service using Flask framework might not be the best web framework to service millions of user. Languages like Java and Frameworks like Spring, Play or any J2EE application/service framework would probably pretty be suited
 for specific applications like this. But there has been sites like Obama's 2012 election site and Twilio are both built on this framework and
 have handle requests at large scale.
 - Using any cloud service, such as AWS or GCP using a load balancer and containerized app clusters should be able to scale and handle each part
