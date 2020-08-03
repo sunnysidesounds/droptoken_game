@@ -57,6 +57,16 @@ To setup this service, please follow these steps.
 9. Start the application by `venv/bin/python app.py`
 10. Once up and running visit any of the endpoint urls in the ***ENDPOINTS*** section.
 
+
+## Trade-offs/Compromises, Scale, or Performance Issue Considerations
+- For high-performance web service using Flask framework might not be the best web framework to service millions of user, like
+JIRA. Languages like Java and Frameworks like Spring, Play or any J2EE application/service framework would probably pretty be suited
+for specific applications like this. But there has been sites like Obama's 2012 election site and Twilio are both built on this framework and
+have handle requests at large scale.
+- Using any cloud service, such as AWS or GCP using a load balancer and containerized app clusters should be able to scale and handle each part
+of the application.
+
+
 ## Available Endpoints:
 These are the current available endpoints for this service.
 
@@ -158,3 +168,16 @@ CREATE TABLE `moves` (
        CONSTRAINT `player_id_constraint_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
+
+## Testing / Tests:
+
+### Integration / Endpoint Tests:
+
+##### Testing locally:
+1. Currently to run tests you need to have setup the environment locally (See SETUP, locally above)
+2. Once setup you can run this command to test all current endpoints:
+    -  `venv/bin/python ./app/tests/test_endpoints.py`
+
+##### Testing using Docker:
+1. You can current run this bash script locally and it will hit all of the endpoints.
+    - ` bash ./scripts/test_endpoints_docker.sh`

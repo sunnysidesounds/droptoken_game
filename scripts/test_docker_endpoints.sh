@@ -24,7 +24,6 @@ curl --header "Content-Type: application/json" \
 
 
 # GetMovePlayed endpoint resource
-curl -X GET 'http://localhost:5000/drop_token/2/moves/bad_test'
 curl -X GET 'http://localhost:5000/drop_token/1/moves/2'
 
 # PlayerQuitsGame endpoint resource
