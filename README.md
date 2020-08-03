@@ -77,6 +77,7 @@ curl --header "Content-Type: application/json" \
 `curl -X GET 'http://localhost:5000/drop_token/13'`
 
 ***Get List of Moves Played***
+
 `curl -X GET 'http://localhost:5000/drop_token/1/moves'`
 
 ***Post a Game Move***
@@ -88,9 +89,11 @@ curl --header "Content-Type: application/json" \
 ```
 
 ***Get Move Played***
+
 `curl -X GET 'http://localhost:5000/drop_token/1/moves/2'`
 
 ***Player Quits Games***
+
 `curl -X DELETE 'http://localhost:5000/drop_token/1/1'`
 
 
