@@ -1,13 +1,13 @@
 # DROP TOKEN GAME SERVICE
 ***98point6 Drop-Token: At-home interview question for BE engineers***
 
-### Task:
+## Task:
 We would like you to implement a backend (REST web-service) that allows playing the game of 9dt,
 or 98point6 drop token. This should allow the players to create games, post moves, query moves
 and get state of games.
 
 
-### Rules:
+## Rules:
 - takes place on a 4x4 grid
 - token is dropped along one of the columns
 - token goes to the lowest unoccupied row of the board
@@ -17,7 +17,7 @@ and get state of games.
 - player tries to put a token in a column that is already full, returns error state, and the player must play again until valid move.
 
 
-### Technical Details
+## Technical Details
 - Flask Python Web Service: https://flask.palletsprojects.com/en/1.1.x/
 - MYSQL 8.0.19
 - Python 3.8
@@ -25,7 +25,7 @@ and get state of games.
 ## Setup
 To setup this service, please follow these steps.
 
-##### Setup with Docker
+### Setup with Docker
 
 ***Prerequisites***
 - Docker 2.2.0.5
@@ -38,7 +38,7 @@ To setup this service, please follow these steps.
 6. Once up and running visit any of the endpoint urls in the ***ENDPOINTS*** section.
 
 
-##### Setup Locally
+### Setup Locally
 
 ***Prerequisites***
 - MYSQL 8.0.19
@@ -98,7 +98,7 @@ curl --header "Content-Type: application/json" \
 
 
 
-### Database Schemas
+## Database Schemas
 
 ***Games Table***
 ```
