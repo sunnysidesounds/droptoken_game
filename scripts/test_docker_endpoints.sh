@@ -6,7 +6,7 @@ curl -X GET 'http://localhost:5000/drop_token'
 # CreateNewGame endpoint resource
 curl --header "Content-Type: application/json" \
     --request POST \
-    --data '{ "players": ["player20", "player21"], "columns": 4, "rows": 4}' \
+    --data '{ "players": ["testPlayer5", "testPlayer6"], "columns": 4, "rows": 4}' \
     http://localhost:5000/drop_token
 
 # GetStateOfGame endpoint resource
@@ -20,7 +20,7 @@ curl -X GET 'http://localhost:5000/drop_token/1/moves'
 curl --header "Content-Type: application/json" \
     --request POST \
     --data '{"column" : 2}' \
-    http://localhost:5000/drop_token/1/1
+    http://localhost:5000/drop_token/1/2
 
 
 # GetMovePlayed endpoint resource

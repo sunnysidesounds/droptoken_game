@@ -4,7 +4,7 @@ RUN mkdir /flask_app
 
 WORKDIR /flask_app
 
-ADD ./sql/yaits_sample_db.sql /docker-entrypoint-initdb.d
+ADD ./docker_sql/droptoken_game_sample_db.sql /docker-entrypoint-initdb.d
 ADD . /flask_app
 
 RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib/apt

@@ -12,7 +12,7 @@ services:
     environment:
       MYSQL_USER: test
       MYSQL_PASSWORD: test
-      MYSQL_HOST: yaits_database
+      MYSQL_HOST: droptoken_game_database
       MYSQL_DATABASE: testdb
       MYSQL_ROOT_PASSWORD: root
       SECRET_KEY: 'you-will-never-guess'
@@ -31,6 +31,6 @@ services:
       MYSQL_DATABASE: testdb
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./sql:/docker-entrypoint-initdb.d
+      - ./docker_sql:/docker-entrypoint-initdb.d
 volumes:
   mysql_data:
