@@ -45,3 +45,14 @@ class UnitTestConfig(object):
 
     def set_config(self):
         return self.app
+
+
+class EndpoingTestingConfig(object):
+
+    def __init__(self, app):
+        self.app = app
+        pass
+
+    def set_config(self):
+        return self.app
+

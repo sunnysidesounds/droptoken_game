@@ -16,6 +16,27 @@ and get state of games.
 - Each player takes a turn, starting with player 1, until the game reaches either win or draw.
 - player tries to put a token in a column that is already full, returns error state, and the player must play again until valid move.
 
+## TODO's / Ideas To Improve/Extend Service
+- TODO: Method size reduction.
+    - There are methods mainly in the resource.py where it's body size should be reduced, create methods
+
+- TODO: Refactor the GameCreator class
+    - Right now it's a set of static methods. OOify this with maybe a factory design pattern.
+
+- TODO: ORMify complex queries
+    - In java you can create nested models with subtypes that are accessble from the parent model.
+    - i.e Game would have a subType of moves, can explain more...
+    - If we did this, it would ORMify the 2-3 raw join sql queries I used.
+
+- TODO: Add unit tests
+     - We have basic integration / endpoint tests, we should write unit tests to test utility functions..etc
+
+- TODO: Add an in-memory database for integration / endpoint tests.
+    - Right now we are test CRUD functionality on a MySQL database.
+    - Started a config for it in EndpoingTestingConfig
+
+- TODO: Add a basic html GUI page to see the playing board
+
 
 ## Technical Details
 - Flask Python Web Service: https://flask.palletsprojects.com/en/1.1.x/
@@ -56,6 +77,17 @@ To setup this service, please follow these steps.
 8. Import the test data `mysql -u USER -pPASS testdb < ./sql/droptoken_game_sample_db.sql`
 9. Start the application by `venv/bin/python app.py`
 10. Once up and running visit any of the endpoint urls in the ***ENDPOINTS*** section.
+
+NOTE: If you for some reason when you start and get a db connection error.
+You may need to set some environment variables to your local environment. See below
+
+```
+export SECRET_KEY='this-is-a-secret'
+export MYSQL_USER='test'
+export MYSQL_PASSWORD='test'
+export MYSQL_HOST='localhost'
+export MYSQL_DATABASE='testdb'
+```
 
 
 ## Trade-offs/Compromises, Scale, or Performance Issue Considerations

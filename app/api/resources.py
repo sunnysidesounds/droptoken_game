@@ -17,8 +17,6 @@ class CreateNewGame(Resource):
     def post(self):
         data = request.get_json(force=True)
 
-        # TODO: Look at more validation, model level
-
         if 'columns' in data and 'rows' in data and 'players' in data:
             game = GameCreator.create_game(data)
             game_primary_key = game[0]
@@ -55,7 +53,6 @@ class ReturnAllInProgressGames(Resource):
 class GetStateOfGame(Resource):
     def get(self, game_id):
 
-        # Able to pass in game name (uuid) or primary key
         if game_id.isdigit():
             where_clause = "where g.id = :id"
         else:
@@ -94,11 +91,20 @@ class GetStateOfGame(Resource):
 
 class GetListOfMovesPlayed(Resource):
     def get(self, game_id):
+        args = parser.parse_args()
+        start = args['start']
+        until = args['until']
+
         if not game_id.isdigit():
             abort(400, constants.NO_REQUIRED_GAME_STATE_VALUES_ERROR)
+        limits = ''
 
-        query = text("""select p.name as `player`, m.type, m.board_column as `column` from moves m
-        JOIN players p ON p.id = m.player_id WHERE m.game_id = :id""")
+        if start and until:
+            limits = "LIMIT {amount}".format(amount=abs(start - until))
+
+        query_text = """select p.name as `player`, m.type, m.board_column as `column` from moves m
+        JOIN players p ON p.id = m.player_id WHERE m.game_id = :id {limits}""".format(limits)
+        query = text()
 
         data = db.engine.execute(query, id=game_id).fetchall()
         if not data:
@@ -130,10 +136,10 @@ class GetMovePlayed(Resource):
 class PostAGameMove(Resource):
 
     def post(self, game_id, player_id):
+        # TODO: Break-up this method it is too big
         data = request.get_json(force=True)
 
         # validate game_id
-        # TODO: Remove uuid
         if game_id.isdigit():
             if not GameCreator.game_exists(game_id):
                 abort(404, constants.NO_GAME_FOUND)
@@ -172,7 +178,7 @@ class PostAGameMove(Resource):
             if current_column <= game_column:
                 board_game = json.loads(game.board)
                 current_row = 0
-
+                # find row / column indexes to place token on board
                 for i in range(0, len(board_game)):
                     move = board_game[i][current_column]
                     current_row = i
@@ -185,27 +191,27 @@ class PostAGameMove(Resource):
                     abort(409, constants.CAN_NOT_MOVE_ERROR)
 
                 board_game[current_row][current_column] = player_id
+
                 # Check if player won after move
                 if GameCreator.has_player_won(board_game, player_id):
                     game.state = StateType.DONE
                     next_player = ''
                     winner = player_name
 
-                # TODO: Check for draw
+                # Check for draw
+                if not GameCreator.is_the_game_a_draw(board_game):
+                    game.state = StateType.DONE
+                    next_player = ''
+                    winner = 'draw'
 
+                # Update the games table
                 game.update(game_id, {"state": game.state,
                                       "board": json.dumps(board_game),
                                       "active_turn": next_player,
                                       "winner": winner})
 
                 # Insert move data in to move table
-                game_moves = MovesModel()
-                game_moves.game_id = game_id
-                game_moves.player_id = player_id
-                game_moves.type = MoveType.MOVE
-                game_moves.board_column = current_column + 1
-                game_moves.board_row = current_row + 1
-                game_moves.save()
+                GameCreator.create_game_move(game_id, player_id, current_column, current_row)
 
                 return {"move": "{gameId}/moves/{move_number}".format(gameId=game_id, move_number=data['column'])}
 
@@ -232,7 +238,17 @@ class PlayerQuitsGame(Resource):
             abort(404, constants.NO_PLAYER_FOUND)
 
         game = GameCreator.get_game(game_id)
+        # TODO: Put this in a method
+        # check if the player_id can quit
         game_players = GameCreator.get_players(game_id)
+        can_delete = False
+        for player in game_players:
+            if player['player_id'] == player_id:
+                can_delete = True
+                break
+        if not can_delete:
+            abort(400, constants.NO_REQUIRED_GAME_MOVE_ERROR)
+
 
         # TODO : Check if players is apart of this game to be able to quit
 
@@ -257,7 +273,7 @@ class PlayerQuitsGame(Resource):
         game_moves.board_row = -1
         game_moves.save()
 
-        return {"status": "success"}, 202 # return a 202 reponse
+        return {"status": "success"}, 202  # return a 202 reponse
 
 
 class GameCreator:
@@ -281,7 +297,7 @@ class GameCreator:
         model.board = json.dumps(generate_board(data['columns'], data['rows']))
         model.state = StateType.INPROGRESS
         model.winner = ''
-        model.active_turn = data['players'][0] #set first player in list to active user
+        model.active_turn = data['players'][0]
         model.save()
         db.session.flush()
         return (model.id, game_id)
@@ -295,9 +311,19 @@ class GameCreator:
         return model.id
 
     @staticmethod
+    def create_game_move(game_id, player_id, column, row):
+        game_moves = MovesModel()
+        game_moves.game_id = game_id
+        game_moves.player_id = player_id
+        game_moves.type = MoveType.MOVE
+        game_moves.board_column = column + 1
+        game_moves.board_row = row + 1
+        game_moves.save()
+
+    @staticmethod
     def generate_unique_game_id():
         # try 5 times to generate a unique game id
-        # TODO : Revisit, may not need this to be unique as we have primary keys
+        # TODO : Revisit, may not need to do this uuid1, has strict uniqueness
         for i in range(0, 5):
             game_id = get_uuid()
             game_id_exist = GamesModel.query.filter_by(id=game_id).first()
@@ -359,6 +385,16 @@ class GameCreator:
         return [dict(player) for player in db.engine.execute(query, id=game_id).fetchall()]
 
     @staticmethod
+    def is_the_game_a_draw(board):
+        is_draw = False
+        for i in range(0, len(board)):
+            row = board[i]
+            if all_same_values(row, 0):  # if there are no more zero's on board. No more open places
+                is_draw = True
+                break
+        return is_draw
+
+    @staticmethod
     def has_player_won(board, player_id):
         has_won = False
 
@@ -376,7 +412,7 @@ class GameCreator:
                 has_won = True
                 break
 
-        # Check diagonals
+        # Check diagonals (only checking top-left to bottom-right, and top-right to bottom-left)
         for diagnoal in get_diagonals(board):
             if all_same_values(diagnoal, player_id):
                 has_won = True

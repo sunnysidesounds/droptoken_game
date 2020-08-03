@@ -14,6 +14,7 @@ class MoveType(enum.Enum):
     MOVE = "MOVE"
     QUIT = "QUIT"
 
+
 # MODELS
 
 

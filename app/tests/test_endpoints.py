@@ -64,7 +64,6 @@ class BasicEndpointsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(BasicEndpointsTests.is_valid_json(data), True)
 
-
     def test_get_list_of_moved_played_200_response(self):
         response = self.app.get('drop_token/1', follow_redirects=True)
         data = response.get_json()
@@ -101,7 +100,6 @@ class BasicEndpointsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(self.is_valid_json(data), True)
 
-
     def test_post_a_game_move_404_response(self):
         payload = json.dumps({})
         response = self.app.post('drop_token/200/400', headers={"Content-Type": "application/json"}, data=payload)
@@ -115,7 +113,6 @@ class BasicEndpointsTests(unittest.TestCase):
         data = response.get_json()
         self.assertEqual(response.status_code, 409)
         self.assertEqual(self.is_valid_json(data), True)
-
 
     def test_get_move_played_200_response(self):
         response = self.app.get('drop_token/1/moves/2', follow_redirects=True)
@@ -134,7 +131,6 @@ class BasicEndpointsTests(unittest.TestCase):
         data = response.get_json()
         self.assertEqual(response.status_code, 404)
         self.assertEqual(BasicEndpointsTests.is_valid_json(data), True)
-
 
     def test_player_quits_game_202_response(self):
         response = self.app.delete('drop_token/3/1', follow_redirects=True)
