@@ -31,7 +31,7 @@ To setup this service, please follow these steps.
 - Docker 2.2.0.5
 
 1. Download and install Docker Desktop: https://www.docker.com/products/docker-desktop
-2. Pull down from git or unzip the yaits/ service source code.
+2. Pull down from git or unzip the droptoken_game/ service source code.
 3. Get to the root directory of the service `cd /path-to-project/droptoken_game/`
 4. Build the service: `docker-compose build --no-cache`
 5. Launch the service and db containers: `docker-compose up`
@@ -63,6 +63,35 @@ These are the current available endpoints for this service.
 ***Return All In-Progress Endpoints***
 
 `curl -X GET 'http://localhost:5000/drop_token'`
+
+***Create New Game***
+```
+curl --header "Content-Type: application/json" \
+    --request POST \
+    --data '{ "players": ["player20", "player21"], "columns": 4, "rows": 4}' \
+    http://localhost:5000/drop_token
+```
+
+***Get State of Game***
+
+`curl -X GET 'http://localhost:5000/drop_token/13'`
+
+***Get List of Moves Played***
+`curl -X GET 'http://localhost:5000/drop_token/1/moves'`
+
+***Post a Game Move***
+```
+curl --header "Content-Type: application/json" \
+    --request POST \
+    --data '{"column" : 2}' \
+    http://localhost:5000/drop_token/1/1
+```
+
+***Get Move Played***
+`curl -X GET 'http://localhost:5000/drop_token/1/moves/2'`
+
+***Player Quits Games***
+`curl -X DELETE 'http://localhost:5000/drop_token/1/1'`
 
 
 

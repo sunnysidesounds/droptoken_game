@@ -12,9 +12,6 @@ curl --header "Content-Type: application/json" \
 # GetStateOfGame endpoint resource
 curl -X GET 'http://localhost:5000/drop_token/13'
 
-# No longer works. TODO make work?
-curl -X GET 'http://localhost:5000/drop_token/c52b16e0-d3b7-11ea-879a-8c85904e8d06'
-
 # GetListOfMovesPlayed endpoint resource
 curl -X GET 'http://localhost:5000/drop_token/1/moves'
 
